@@ -1,4 +1,5 @@
-package com.example.bridgeu.model;
+//package com.example.bridgeu.model;
+package com.example.demo.model;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;

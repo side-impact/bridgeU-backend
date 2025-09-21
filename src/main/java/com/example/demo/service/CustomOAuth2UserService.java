@@ -1,6 +1,8 @@
-package com.example.bridgeu.service;
+//package com.example.bridgeu.service;
+package com.example.demo.service;
 
-import com.example.bridgeu.model.CustomOAuth2User;
+//import com.example.bridgeu.model.CustomOAuth2User;
+import com.example.demo.model.CustomOAuth2User;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
