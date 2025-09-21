@@ -11,11 +11,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf().disable() // Flutter, Postman 테스트용
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll() // /auth/**는 인증 없이 접근 가능
+                .requestMatchers("/auth/**", "/", "/error", "/webjars/**", "/api/**", "/debug/**").permitAll()
                 .anyRequest().authenticated()
             );
+            // .oauth2Login(oauth -> oauth
+            //     .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+            //     .defaultSuccessUrl("/welcome", true)
+            // );
         return http.build();
     }
 }
