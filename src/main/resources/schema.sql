@@ -11,14 +11,14 @@ CREATE TABLE IF NOT EXISTS universities (
 );;
 
 CREATE TABLE IF NOT EXISTS users (
-  id       SERIAL PRIMARY KEY,
+  id       BIGSERIAL PRIMARY KEY,
   email    VARCHAR(255) UNIQUE NOT NULL,
   name     VARCHAR(100),
   password VARCHAR(255)
 );;
 
 CREATE TABLE IF NOT EXISTS tags (
-  id                 SERIAL PRIMARY KEY,
+  id                 BIGSERIAL PRIMARY KEY,
   slug               TEXT UNIQUE NOT NULL,
   labels             JSONB NOT NULL,
   "group"            TEXT NOT NULL CHECK ("group" IN ('user','school','notice')),
@@ -28,11 +28,11 @@ CREATE INDEX IF NOT EXISTS idx_tags_group ON tags("group");;
 
 CREATE TABLE IF NOT EXISTS posts (
   id            BIGSERIAL PRIMARY KEY,
-  author_id     INT REFERENCES users(id) ON DELETE SET NULL,
+  author_id     BIGINT REFERENCES users(id) ON DELETE SET NULL,
   lang          lang_code NOT NULL DEFAULT 'en',
   title         TEXT NOT NULL CHECK (char_length(title) BETWEEN 1 AND 60),
   content       TEXT,
-  tags          INT[] NOT NULL DEFAULT '{}',
+  tags          BIGINT[] NOT NULL DEFAULT '{}',
   view_count    BIGINT NOT NULL DEFAULT 0 CHECK (view_count >= 0),
   content_text  TEXT,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
