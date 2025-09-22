@@ -26,7 +26,7 @@ public class PostRepositoryImpl {
     }
     
     public boolean userExists(Long userId) {
-        String sql = "SELECT 1 FROM users WHERE user_id = ?";
+        String sql = "SELECT 1 FROM users WHERE id = ?";
         List<Integer> result = jdbcTemplate.queryForList(sql, Integer.class, userId);
         return !result.isEmpty();
     }
@@ -63,8 +63,8 @@ public class PostRepositoryImpl {
      */
     public Long createPost(Long authorId, String lang, String title, List<Integer> tagIds) throws SQLException {
         String sql = """
-            INSERT INTO posts(author_id, lang, title, tags)
-            VALUES (?, ?::lang_code, ?, ?)
+            INSERT INTO posts(author_id, title, tags)
+            VALUES (?, ?, ?)
             RETURNING id
             """;
         
@@ -74,13 +74,12 @@ public class PostRepositoryImpl {
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 ps.setLong(1, authorId);
-                ps.setString(2, lang);
-                ps.setString(3, title);
+                ps.setString(2, title);
                 
                 // Integer[] 배열을 PostgreSQL array로 변환
                 Integer[] tagArray = tagIds.toArray(new Integer[0]);
                 java.sql.Array sqlArray = connection.createArrayOf("integer", tagArray);
-                ps.setArray(4, sqlArray);
+                ps.setArray(3, sqlArray);
                 
                 return ps;
             }, keyHolder);
@@ -164,14 +163,14 @@ public class PostRepositoryImpl {
             
             String updatePostSql = """
                 UPDATE posts 
-                SET lang = ?::lang_code, title = ?, tags = ?
+                SET title = ?, tags = ?
                 WHERE id = ?
                 """;
             
             Integer[] tagArray = tagIds.toArray(new Integer[0]);
             java.sql.Array sqlArray = jdbcTemplate.getDataSource().getConnection().createArrayOf("integer", tagArray);
             
-            jdbcTemplate.update(updatePostSql, lang, title, sqlArray, postId);
+            jdbcTemplate.update(updatePostSql, title, sqlArray, postId);
             
             // 새로운 블록 생성
             createPostBlocks(postId, blocks);

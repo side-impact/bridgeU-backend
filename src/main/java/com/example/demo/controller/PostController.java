@@ -8,11 +8,13 @@ import com.example.demo.dto.posts.CreatePostRequest;
 import com.example.demo.dto.posts.CreatePostResponse;
 import com.example.demo.dto.posts.UpdatePostRequest;
 import com.example.demo.dto.posts.UpdatePostResponse;
+import com.example.demo.model.User;
 import com.example.demo.service.PostService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
@@ -95,14 +97,15 @@ public class PostController {
      * GET /api/posts/{post_id}
      * 
      * @param postId 조회할 게시물 ID
-     * @param currentUserId 현재 사용자 ID (헤더에서 추출, 선택사항)
+     * @param currentUser 현재 인증된 사용자 (JWT에서 추출)
      * @return 게시물 상세 정보 (블록, 작성자 정보, is_owner 포함)
      */
     @GetMapping("/posts/{post_id}")
     public ResponseEntity<ApiResponse<PostDetailDto>> getPostDetail(
             @PathVariable("post_id") Long postId,
-            @RequestHeader(value = "X-Temp-User-Id", required = false) Long currentUserId) {
+            @AuthenticationPrincipal User currentUser) {
         try {
+            Long currentUserId = currentUser != null ? currentUser.getId() : null;
             logger.info("API 호출: getPostDetail(postId={}, currentUserId={})", postId, currentUserId);
             PostDetailDto postDetail = postService.getPostDetail(postId, currentUserId);
             logger.info("API 성공: 게시물 상세 정보 반환 (postId={}, viewCount={}, isOwner={})", 
@@ -127,15 +130,16 @@ public class PostController {
      * 게시물 생성 API
      * POST /api/posts
      * 
-     * @param currentUserId 현재 사용자 ID (헤더에서 추출)
+     * @param currentUser 현재 인증된 사용자 (JWT에서 추출)
      * @param request 게시물 생성 요청 데이터
      * @return 생성된 게시물 ID
      */
     @PostMapping("/posts")
     public ResponseEntity<ApiResponse<CreatePostResponse>> createPost(
-            @RequestHeader("X-Temp-User-Id") Long currentUserId,
+            @AuthenticationPrincipal User currentUser,
             @Valid @RequestBody CreatePostRequest request) {
         
+        Long currentUserId = currentUser.getId();
         logger.info("API 호출: createPost(userId={}, title={})", currentUserId, request.getTitle());
         
         CreatePostResponse response = postService.createPost(currentUserId, request);
@@ -150,16 +154,17 @@ public class PostController {
      * PUT /api/posts/{post_id}
      * 
      * @param postId 수정할 게시물 ID
-     * @param currentUserId 현재 사용자 ID (헤더에서 추출)
+     * @param currentUser 현재 인증된 사용자 (JWT에서 추출)
      * @param request 게시물 수정 요청 데이터
      * @return 수정된 게시물 응답
      */
     @PutMapping("/posts/{post_id}")
     public ResponseEntity<ApiResponse<UpdatePostResponse>> updatePost(
             @PathVariable("post_id") Long postId,
-            @RequestHeader("X-Temp-User-Id") Long currentUserId,
+            @AuthenticationPrincipal User currentUser,
             @Valid @RequestBody UpdatePostRequest request) {
         
+        Long currentUserId = currentUser.getId();
         try {
             logger.info("API 호출: updatePost(postId={}, userId={}, title={})", 
                 postId, currentUserId, request.getTitle());
@@ -201,14 +206,15 @@ public class PostController {
      * DELETE /api/posts/{post_id}
      * 
      * @param postId 삭제할 게시물 ID
-     * @param currentUserId 현재 사용자 ID (헤더에서 추출)
+     * @param currentUser 현재 인증된 사용자 (JWT에서 추출)
      * @return 삭제 결과
      */
     @DeleteMapping("/posts/{post_id}")
     public ResponseEntity<ApiResponse<Void>> deletePost(
             @PathVariable("post_id") Long postId,
-            @RequestHeader("X-Temp-User-Id") Long currentUserId) {
+            @AuthenticationPrincipal User currentUser) {
         
+        Long currentUserId = currentUser.getId();
         try {
             logger.info("API 호출: deletePost(postId={}, userId={})", postId, currentUserId);
             

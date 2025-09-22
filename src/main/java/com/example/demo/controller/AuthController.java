@@ -40,19 +40,68 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
-        logger.info("Register endpoint called");
-        logger.info("Received register request - email: {}, name: {}", request.getEmail(), request.getName());
+        logger.info("===============================================");
+        logger.info("=== /auth/register 엔드포인트 호출됨 ===");
+        logger.info("===============================================");
+        
+        try {
+            // 요청 데이터 로그
+            logger.info("회원가입 요청 데이터:");
+            logger.info("  - email: {}", request.getEmail());
+            logger.info("  - name: {}", request.getName());
+            logger.info("  - password length: {}", request.getPassword() != null ? request.getPassword().length() : "null");
+            
+            // 입력값 검증
+            if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+                logger.error("회원가입 실패: 이메일이 비어있음");
+                return ResponseEntity.badRequest().body(new AuthResponse("이메일은 필수입니다"));
+            }
+            if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+                logger.error("회원가입 실패: 비밀번호가 비어있음");
+                return ResponseEntity.badRequest().body(new AuthResponse("비밀번호는 필수입니다"));
+            }
+            if (request.getName() == null || request.getName().trim().isEmpty()) {
+                logger.error("회원가입 실패: 이름이 비어있음");
+                return ResponseEntity.badRequest().body(new AuthResponse("이름은 필수입니다"));
+            }
+            
+            logger.info("입력값 검증 통과");
 
-        if (userService.existsByEmail(request.getEmail())) {
-            logger.warn("Email already exists: {}", request.getEmail());
-            return ResponseEntity.badRequest().body(new AuthResponse("Email already exists"));
+            // 이메일 중복 체크
+            logger.info("이메일 중복 체크 시작...");
+            if (userService.existsByEmail(request.getEmail())) {
+                logger.warn("회원가입 실패: 이메일이 이미 존재함 - {}", request.getEmail());
+                return ResponseEntity.badRequest().body(new AuthResponse("이미 사용 중인 이메일입니다"));
+            }
+            logger.info("이메일 중복 체크 통과");
+
+            // 사용자 등록
+            logger.info("사용자 등록 프로세스 시작...");
+            User user = userService.register(request.getEmail(), request.getPassword(), request.getName());
+            logger.info("사용자 등록 완료 - userId: {}, email: {}", user.getId(), user.getEmail());
+
+            // JWT 토큰 생성
+            logger.info("JWT 토큰 생성 시작...");
+            String token = jwtUtil.generateToken(user.getEmail());
+            logger.info("JWT 토큰 생성 완료");
+
+            logger.info("===============================================");
+            logger.info("=== 회원가입 성공 - email: {} ===", user.getEmail());
+            logger.info("===============================================");
+            
+            return ResponseEntity.ok(new AuthResponse(token));
+            
+        } catch (Exception e) {
+            logger.error("===============================================");
+            logger.error("=== 회원가입 중 예외 발생 ===");
+            logger.error("===============================================");
+            logger.error("요청 이메일: {}", request.getEmail());
+            logger.error("오류 메시지: {}", e.getMessage());
+            logger.error("오류 클래스: {}", e.getClass().getSimpleName());
+            logger.error("전체 스택 트레이스: ", e);
+            
+            return ResponseEntity.status(500).body(new AuthResponse("회원가입 중 오류가 발생했습니다: " + e.getMessage()));
         }
-
-        User user = userService.register(request.getEmail(), request.getPassword(), request.getName());
-        String token = jwtUtil.generateToken(user.getEmail());
-        logger.info("User registered successfully: {}", user.getEmail());
-
-        return ResponseEntity.ok(new AuthResponse(token));
     }
 
     // DTO

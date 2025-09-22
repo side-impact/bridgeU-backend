@@ -291,7 +291,7 @@ public class PostService {
             try {
                 Long postId = postRepositoryImpl.createPost(
                     currentUserId, 
-                    request.getLang(), 
+                    "en", 
                     request.getTitle(), 
                     request.getTags()
                 );
@@ -331,10 +331,11 @@ public class PostService {
             throw new IllegalArgumentException("Title must be 60 characters or less");
         }
         
-        String lang = request.getLang();
-        if (!Arrays.asList("en", "ja", "zh-CN", "ko").contains(lang)) {
-            throw new IllegalArgumentException("Invalid language code: " + lang);
-        }
+        // lang은 임시로 고정값 'en' 사용 (데이터베이스 스키마 문제로 인해)
+        // String lang = request.getLang();
+        // if (!Arrays.asList("en", "ja", "zh-CN", "ko").contains(lang)) {
+        //     throw new IllegalArgumentException("Invalid language code: " + lang);
+        // }
         
         if (request.getBlocks() == null || request.getBlocks().isEmpty()) {
             throw new IllegalArgumentException("Blocks are required");
@@ -489,7 +490,7 @@ public class PostService {
             try {
                 postRepositoryImpl.updatePost(
                     postId,
-                    request.getLang(),
+                    "en",
                     request.getTitle(),
                     request.getTags(),
                     request.getBlocks()
@@ -550,10 +551,11 @@ public class PostService {
             throw new IllegalArgumentException("Title must be 60 characters or less");
         }
         
-        String lang = request.getLang();
-        if (!Arrays.asList("en", "ja", "zh-CN", "ko").contains(lang)) {
-            throw new IllegalArgumentException("Invalid language code: " + lang);
-        }
+        // lang은 임시로 고정값 'en' 사용 (데이터베이스 스키마 문제로 인해)
+        // String lang = request.getLang();
+        // if (!Arrays.asList("en", "ja", "zh-CN", "ko").contains(lang)) {
+        //     throw new IllegalArgumentException("Invalid language code: " + lang);
+        // }
         
         if (request.getBlocks() == null || request.getBlocks().isEmpty()) {
             throw new IllegalArgumentException("Blocks are required");

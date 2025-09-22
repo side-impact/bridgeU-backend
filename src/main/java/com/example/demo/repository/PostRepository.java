@@ -28,14 +28,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             p.content_text,
             p.created_at,
             p.view_count,
-            u.user_id,
-            u.username,
+            u.id,
+            u.name,
             (SELECT pb.image_url 
              FROM post_blocks pb 
              WHERE pb.post_id = p.id AND pb.type = 'image' 
              ORDER BY pb.idx LIMIT 1) as first_image_url
         FROM posts p
-        LEFT JOIN users u ON p.author_id = u.user_id
+        LEFT JOIN users u ON p.author_id = u.id
         WHERE 
             (p.title ILIKE :likePattern OR p.content_text ILIKE :likePattern)
             AND (CAST(:cursorCreatedAt AS timestamptz) IS NULL 
@@ -68,14 +68,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             p.content_text,
             p.created_at,
             p.view_count,
-            u.user_id,
-            u.username,
+            u.id,
+            u.name,
             (SELECT pb.image_url 
              FROM post_blocks pb 
              WHERE pb.post_id = p.id AND pb.type = 'image' 
              ORDER BY pb.idx LIMIT 1) as first_image_url
         FROM posts p
-        LEFT JOIN users u ON p.author_id = u.user_id
+        LEFT JOIN users u ON p.author_id = u.id
         WHERE 
             :tagId = ANY(p.tags)
             AND (CAST(:cursorCreatedAt AS timestamptz) IS NULL 
@@ -107,14 +107,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             p.content_text,
             p.created_at,
             p.view_count,
-            u.user_id,
-            u.username,
+            u.id,
+            u.name,
             (SELECT pb.image_url 
              FROM post_blocks pb 
              WHERE pb.post_id = p.id AND pb.type = 'image' 
              ORDER BY pb.idx LIMIT 1) as first_image_url
         FROM posts p
-        LEFT JOIN users u ON p.author_id = u.user_id
+        LEFT JOIN users u ON p.author_id = u.id
         WHERE 
             (CAST(:cursorCreatedAt AS timestamptz) IS NULL 
              OR (p.created_at < CAST(:cursorCreatedAt AS timestamptz)) 
@@ -167,11 +167,11 @@ public interface PostRepository extends JpaRepository<Post, Long> {
      * @return 게시물 상세 정보 배열 (null이면 존재하지 않음)
      */
     @Query(value = """
-        SELECT p.id AS post_id, p.tags, p.title, p.lang, p.view_count, p.content_text,
+        SELECT p.id AS post_id, p.tags, p.title, 'en' AS lang, p.view_count, p.content_text,
                p.created_at, p.updated_at,
-               u.user_id, u.username
+               u.id, u.name
         FROM posts p
-        LEFT JOIN users u ON u.user_id = p.author_id
+        LEFT JOIN users u ON u.id = p.author_id
         WHERE p.id = :postId
         """, nativeQuery = true)
     Object[] findPostDetailRow(@Param("postId") Long postId);

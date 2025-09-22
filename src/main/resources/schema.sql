@@ -10,31 +10,12 @@ CREATE TABLE IF NOT EXISTS universities (
   labels JSONB NOT NULL
 );;
 
-
 CREATE TABLE IF NOT EXISTS users (
-  user_id        BIGSERIAL PRIMARY KEY,
-  login_id       TEXT UNIQUE NOT NULL,
-  username       TEXT NOT NULL,
-  password       TEXT NOT NULL,
-  refresh_token  TEXT,
-  created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at     TIMESTAMPTZ
+  id       SERIAL PRIMARY KEY,
+  email    VARCHAR(255) UNIQUE NOT NULL,
+  name     VARCHAR(100),
+  password VARCHAR(255)
 );;
-
-CREATE OR REPLACE FUNCTION set_updated_at_users()
-RETURNS trigger AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;;
-
-DROP TRIGGER IF EXISTS trg_users_updated_at ON users;;
-CREATE TRIGGER trg_users_updated_at
-BEFORE UPDATE ON users
-FOR EACH ROW
-EXECUTE FUNCTION set_updated_at_users();;
-
 
 CREATE TABLE IF NOT EXISTS tags (
   id                 SERIAL PRIMARY KEY,
@@ -47,7 +28,7 @@ CREATE INDEX IF NOT EXISTS idx_tags_group ON tags("group");;
 
 CREATE TABLE IF NOT EXISTS posts (
   id            BIGSERIAL PRIMARY KEY,
-  author_id     BIGINT REFERENCES users(user_id) ON DELETE SET NULL,
+  author_id     INT REFERENCES users(id) ON DELETE SET NULL,
   lang          lang_code NOT NULL DEFAULT 'en',
   title         TEXT NOT NULL CHECK (char_length(title) BETWEEN 1 AND 60),
   content       TEXT,
