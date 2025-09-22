@@ -37,3 +37,9 @@ out/
 .vscode/
 
 .env
+
+# 로컬 개발용 민감 정보 파일 제외
+application-local.properties
+
+application-local.yml
+application-*.local.yml
