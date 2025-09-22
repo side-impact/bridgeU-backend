@@ -1,7 +1,8 @@
 package com.example.demo.controller;
 
-import com.example.demo.controller.dto.TranslateRequest;
-import com.example.demo.controller.dto.TranslateResponse;
+import com.example.demo.dto.ApiResponse;
+import com.example.demo.dto.TranslateRequest;
+import com.example.demo.dto.TranslateResponse;
 import com.example.demo.service.TranslateService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -24,12 +25,12 @@ public class TranslateController {
      * @return 번역 결과 (translatedText)
      */
     @GetMapping("/test")
-    public String test() {
-        return "Hello World!";
+    public ResponseEntity<ApiResponse<String>> test() {
+        return ResponseEntity.ok(ApiResponse.success("Hello World!"));
     }
     
     @PostMapping("/translate")
-    public ResponseEntity<TranslateResponse> translate(@Valid @RequestBody TranslateRequest request) {
+    public ResponseEntity<ApiResponse<TranslateResponse>> translate(@Valid @RequestBody TranslateRequest request) {
         
         String translatedText = translateService.translate(
             request.getSourceText(),
@@ -37,6 +38,7 @@ public class TranslateController {
             request.getTargetLang()
         );
         
-        return ResponseEntity.ok(new TranslateResponse(translatedText));
+        TranslateResponse response = new TranslateResponse(translatedText);
+        return ResponseEntity.ok(ApiResponse.success("번역이 완료되었습니다.", response));
     }
 }
